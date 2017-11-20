@@ -1,0 +1,89 @@
+1、集合接口
+  Java最初版本只为最常用的数据结构提供了很少的一组类：Vertor、Stack、Hashtable、BitSet、与Enumeration接口提供了一种用于访问任意容器中各个元素的抽象机制。
+  1.1、将集合的接口与实现分离
+    Java集合类库也将接口与实现分离。首先，看一下队列：队列接口指可以在队列的尾部添加元素，在队列的头部删除元素，并且可以查找队列中元素的个数。当需要收集对象，并按照“先进先出”的规则来规避检索对象时就应该使用队列。
+    一个队列接口的最小形式可能类似下面这样：
+    interface Queue<E>{
+      void add(E element);
+      E remove();
+      int size();
+    }
+    这个接口并没有说明队列是如何实现的。队列通常有两种实现方式：一种是使用循环数组；另一种是使用链表。每一个实现都可以通过一个实现了Queue接口的类表示。
+    举例说明：CircularArrayQueue 这个类并不真实存在。
+    class CircularArrayQueue<E> implement Queue<E>{
+        CircularArrayQueue(int capacity){...}//构造方法
+        public void add(E element){...}//Queue接口中add抽象方法的具体实现
+        public E remove(){...}//Queue接口中remove抽象方法的具体实现
+        public int size(){...}//Queue接口中size抽象方法的具体实现
+        private E[] elements;
+        private int head;
+        private int tail;
+    }
+
+    class LinkedListQueue<E> implement Queue<E>{
+        LinkedListQueue(){...}//构造方法
+        public void add(E element){...}
+        public E remove(){...}
+        public int size(){...}
+
+        private Link head;
+        private Link tail;
+    }
+    注意:实际上Java类库中并没有以上的两个类。这里，只是以这些类作为示例，解释一下集合接口和实现在概念上的不同。如果需要一个循环数列，就可以使用Java SE 6中引入的ArrayDeque类。如果需要一个链表队列，就直接使用LInkList类，这个类实现了Queue接口。
+    使用接口来定义一个集合实际上就是一种解耦的思想，一旦构建了集合就不用关注具体的实现方式。只有在侯建集合对象的时候，使用具体的类才有意义。利用这种方式，一旦改变了想法（换一种集合的实现方式）只需要对程序的一个地方作出修改，即调用构造器的地方。实现了程序的解耦。
+
+    循环数组实现队列和链表实现队列的优劣：循环数组要比链表更高效，但是由于循环数组是一个有界集合，即容量有限。如果程序中要收集的对象数量没有上限，就最好使用链表来实现。
+  1.2、Java类库中的集合接口和迭代器接口
+    在Java类库中，集合类的基本接口是Collection接口，这个接口有两个基本方法：
+      public interface Collection<E>{
+        boolean add (E element);
+        Iterator<E> iterator();
+        ...
+      }
+    add方法用于向集合中添加元素。如果添加元素确实改变了集合就返回true，如果集合没有发生变化就返回false。
+    iterator方法用于返回一个实现了Iterator接口的对象。可以使用这个迭代器对象依次访问集合中的元素。
+      1.迭代器
+        Iterator接口包含3个方法：
+        public interface Iterator<E>{
+          E next()；
+          boolean hasNext();
+          void remove();
+        }
+        通过不断调用next方法，可以逐个访问集合中的每个元素。但是，如果到达了集合的末尾，next方法将抛出一个NoSuchElement。因此，在调用next方法之前调用hasNext方法。如果迭代器对象还有多个供访问的元素，这个方法就返回true，如果想要查看集合中的所有元素，就请求一个迭代器，并在hasNext为true的情况下反复调用next方法。
+        从Java SE 5.0起，这个循环可以采用一种更优雅的缩写方式。用"for each"循环可以更加简练地表示同样的循环操作。
+        for(String element : c){
+          doSomething with element;
+        }
+        编译器简单地将"for each"循环翻译为带有迭代器的循环。
+        “for each”循环可以与任何实现了Iterable接口的对象一起工作，这个接口只包含一个方法：
+        public interface Iterable<E>{
+          Iterator<E> iterator();
+        }
+        Collection接口扩展了Iterable接口。因此，对于标准类库中的任何集合都可以使用“for each”循环。
+        元素被访问的顺序取决于集合类型。如果对ArrayList进行迭代，迭代器将从索引0开始，每迭代一次，索引值加1。
+        然而，如果访问HashSet中的元素，每个元素将会按照某种随机的次序出现。虽然可以确定在迭代过程中能够遍历到集合中的所有元素，但是却无法预知元素被访问的次序。这对于计算总和或统计符合某个条件的元素个数这类与顺序无关的操作来说，并不是什么问题。
+        Java集合类库中的迭代器与其他类库中的迭代器在概念上有着重要的区别。
+      2.删除元素
+        Iterator接口的remove方法将会删除上次调用next方法时返回的元素。在大多数情况下，在决定删除某个元素之前应该先看一下这个元素是很具有实际意义的。然而，如果想要删除指定位置上的元素，仍然需要越过这个元素。
+        下面是如何删除字符串集合中第一个元素的方法：
+        Iterator<String> it = c.iterator();
+        it.next();//skip over the first element
+        it.remove();//now remove it
+        更重要的是，对next方法和remove方法的调用具有相互依赖性。如果调用remove之前没有调用next将是不合法的。如果这样做，将会抛出一个IllegalStateException异常。
+        如果想删除两个相邻的元素，不能直接地这样调用:
+        it.remove();
+        it.remove();//Error
+        相反地，必须先调用next越过将要删除的元素。
+        it.remove();
+        it.next();
+        it.remove();//ok
+      3.泛型使用方法
+        由于Collection与Iterator都是泛型接口，可以编写操作任何集合类型的使用方法。例如，下面是一个检测任意集合是否包含指定元素的泛型的方法：
+          public static <E> boolean contains(Collection<E> c,Object obj){
+              for(E element:c){
+                  if(element.equal(obj))
+                  return true ;
+                  return false;
+              }
+          }
+      Java类库的设计者认为：这些实用方法中某些方法非常有用，应该将它们提供给用户使用。这样，类库的使用这就不必自己重新构建这些方法了。contains就是这样一个使用方法。

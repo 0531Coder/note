@@ -148,5 +148,54 @@ boolean类型有两个值：flase和true，用来判定逻辑条件。整形和�
   =   +=   -=   *=   /=   %=   &=   |=   ^=   <<=   >>=    >>>=                  |    从右向左
   ---------------------------------------------------------------------------------------------------
 
-3.5.8 枚举类型
-  当变量取值只在一个有限的集合内。例如：销售的服装只有小、中、大和超大这四种尺寸，针对这种情况，可以自定义枚举类型。枚举类型包括有限个命名的值。
+3.5.8 枚举类型（JDK1.5开始新增）
+  当变量取值只在一个有限的集合内。例如：销售的服装只有小、中、大和超大这四种尺寸，针对这种情况，可以自定义枚举类型。枚举类型包括有限个命名的值。枚举类型初始化方法：enum Size {SAMLL,MEDIUM,LARGE,EXTRA_LARGE}; Size s = Size.MEDIUM; s变量只能去枚举类型给定的值或者是null。
+
+3.6 字符串
+    Java字符串就是Unicode字符序列。Java没有内置的字符串类型，而是在标准Java类库中提供了一个预定义类String。每个使用双引号括起来的字符串都是String类的一个实例。
+3.6.1 子串
+    String类中的substring方法可以从一个较大的字符串提取一个子串。
+
+3.6.2 拼接
+    与大多数程序设计语言一样，Java语言允许使用+号连接两个字符串。
+3.6.3 不可变字符串
+    String类没有提供用于修改字符串的方法。也就是说不能使用API直接将某个字符串中的某个文字或者字母进行替换（通常是将需要的字符串剪出来然后与其他字符串进行拼接）。但是可以使一个字符串的变量引用另一个字符串。这种不可变字符串的做法可以达到编译器让字符串共享的目的(具体的工作方式就是将所有的字符串存放在公共的存储池中。字符串变量指向存储池中的相应的位置。如果复制一个字符串)。
+
+3.6.4 检测字符串是否相等
+    可以使用equals方法来检测两个字符串是否相等。s.equal(t);s和t可以是字符串变量也可以是字符串常量。如果想检测两个字符串是否相等而不区分大小写，可以使用equalsIgnoreCase方法。一定不能使用==来判断字符串是否相同。==比较的是存储地址是否相等。
+
+3.6.5 代码点和代码单元
+    Java字符串由char序列组成。从前面可以看到，字符数据类型是一个采用UTF-16编码表示Unicode代码点的代码单元。大多数的常用Unicode字符使用一个代码单元就可以表示，而辅助字符需要一对代码单元表示。length方法将返回采用UTF-16编码表示的给定字符串所需要的代码单元数量。
+
+3.6.6 字符串API
+    Java中的String类包含了50多个方法。大部分都经常使用，下面的API汇总了一部分最常用的方法。
+    char charAt（int index）
+    返回给定位置的代码单元。除非对底层的代码单元感兴趣，否则不需要调用这个方法。
+    int codePointAt(int index) Java5.0引入
+    返回从给定位置开始或结束的代码点
+    int offsetByCodePoints(int startIndex , int cpCount) java5.0引入
+    返回从startIndex代码点开始，位移cpCount后的代码点索引。
+    int compareTo(String other)
+    按照字典顺序，如果字符串位于other之前，返回一个负数：如果字符串位于other之后，返回一个正数，如果两个字符串相等，返回0。
+    boolean endWith(String suffix)
+    如果字符串以suffix结尾，返回true
+    boolean equals（Object other）
+    如果字符串与other相等，返回true
+    boolean equalsIgnoreCase（String other）
+    如果字符串与other相等（忽略大小写），返回true
+    int indexOf(String str)
+    int indexOf(String str,int fromIndex)
+    int indexOf(int cp)
+    int indexOf(int cp,int fromIndex)
+    返回与字符串str或代码点cp匹配的第一个子串的开始位置。这个位置从索引0或fromIndex开始计算。如果在原始串中不存在str，返回-1。
+    int lastIndexOf(String str)
+    int lastIndexOf(string str,int fromIndex)
+    int lastIndexOf(int cp)
+    int lastIndexOf(int cp,int fromIndex)
+    返回与字符串str或代码点cp匹配的最后一个子串的开始位置。这个位置从原始串尾端或fromIndex开始计算。
+    int length()
+    返回字符串的长度
+    int codePointCount(int startIndex,int endIndex) Java5.0引入
+    返回startIndex和endIndex-1之间的的代码点数量。没有配成对的代用字符将计入代码点。
+    String replace(CharSequence oldString,chatSequence newString)
+    返回一个新的字符串。这个字符串用newString代替原始字符串中所有的oldString。可以用String或StringBuilder对象作为CharSequence参数。
